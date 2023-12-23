@@ -41,6 +41,7 @@ app.use((req, res, next) => {
 app.use(morgan("dev")) // logging
 app.use(express.urlencoded({ extended: true })) // body parser, this is how we get access to req.body
 app.use(methodOverride("_method")) // Lets us use DELETE PUT HTTP verbs 
+app.use("/public", express.static("public")) // serves our public directory with the url prefix of /public/styles.css. Public directory contains static assets like CSS styling file. You add this public.styles.css file in head.ejs file so that the css style is applied to all ejs files (ejs files render the HTML)
 
 /**
  * Routes and Router
