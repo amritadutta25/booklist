@@ -5,6 +5,7 @@ require("dotenv").config() // this lets use use the variables in .env file
 require("./config/db.js") // brings in our db config. This brings in all the dependencies from db.js. This is done to separate out dependencies for clearer understanding
 const express = require("express")
 const morgan = require("morgan") //logger
+const methodOverride = require("method-override")
 
 const app = express()
 const { PORT = 3013 } = process.env // same as -> const PORT = process.env.PORT || 3013; // use env.PORT if it returns real value else use 3013
@@ -26,10 +27,11 @@ const Book = require("./models/Book.js")
 // })
 app.use(morgan("dev")) // logging
 app.use(express.urlencoded({ extended: true })) // body parser, this is how we get access to req.body
-
+app.use(methodOverride("_method")) // Lets us use DELETE PUT HTTP verbs 
 
 /**
  * Routes and Router
+ * INDUCES
  */
 
 // INDEX route - GET to render all books
@@ -46,6 +48,20 @@ app.get("/books", async (req, res) => {
 app.get("/books/new", (req, res) => {
     // render the create form
     res.render("new.ejs")
+})
+
+// DELETE
+app.delete("/books/:id", async (req, res) => {
+    try {
+        // Find a book and then delete
+        let deletedBook = await Book.findByIdAndDelete(req.params.id)
+        console.log(deletedBook)
+        // redirect back to the index
+        res.redirect("/books")
+        
+    } catch (error) {
+        res.status(500).send("something went wrong when deleting")
+    }
 })
 
 // CREATE route - POST
@@ -69,7 +85,27 @@ app.post("/books", async (req, res) => {
     }
 })
 
+//EDIT route - get the book to edit
+app.get("/books/edit/:id", async (req, res) => {
+    try {
+        // find the book to edit
+        let foundBook = await Book.findByIdAndUpdate(req.params.id)
+        res.render("edit", {
+            book:foundBook
+        })
+    } catch (error) {
+        res.send(error)
+    }
+})
+
 // SHOW route - GET to render only one book
+app.get("/books/:id", async (req, res) => {
+    // find a book by the '_id'
+    let foundBook = await Book.findById(req.params.id)
+
+    // render the book to show.ejs
+    res.render("show.ejs", {book: foundBook})
+})
 
 /**
  * Server listener
