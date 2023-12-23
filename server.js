@@ -55,7 +55,6 @@ app.delete("/books/:id", async (req, res) => {
     try {
         // Find a book and then delete
         let deletedBook = await Book.findByIdAndDelete(req.params.id)
-        console.log(deletedBook)
         // redirect back to the index
         res.redirect("/books")
         
@@ -66,7 +65,8 @@ app.delete("/books/:id", async (req, res) => {
 
 // UPDATE route
 app.put("/books/:id", async (req, res) => {
-    // handle the checkbox logic
+    try {
+        // handle the checkbox logic
 
     // ticked 'checkbox' from front end returns 'on', but based on our model schema 'completed' expects a boolean value so we reformat the 'completed' field value
     if (req.body.completed === "on") {
@@ -87,6 +87,9 @@ app.put("/books/:id", async (req, res) => {
 
     // redirect to show route with the updated book
     res.redirect(`/books/${updatedBook._id}`)
+    } catch (error) {
+        res.send("something went wrong in this route")
+    }
 })
 
 // CREATE route - POST
