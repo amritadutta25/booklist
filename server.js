@@ -64,11 +64,36 @@ app.delete("/books/:id", async (req, res) => {
     }
 })
 
+// UPDATE route
+app.put("/books/:id", async (req, res) => {
+    // handle the checkbox logic
+
+    // ticked 'checkbox' from front end returns 'on', but based on our model schema 'completed' expects a boolean value so we reformat the 'completed' field value
+    if (req.body.completed === "on") {
+        req.body.completed = true
+    } else {
+        req.body.completed = false
+    }
+
+    // then find the book by id and update with the req.body
+    //findByIdUpdate(id, data to update, options)
+    let updatedBook = await Book.findByIdAndUpdate(
+        req.params.id,
+        req.body,
+        {
+            new: true
+        }
+    )
+
+    // redirect to show route with the updated book
+    res.redirect(`/books/${updatedBook._id}`)
+})
+
 // CREATE route - POST
 app.post("/books", async (req, res) => {
 
     try {
-         // checkbox in frontend returns 'on' if checkbox is ticked
+         // checkbox in frontend returns 'on' if checkbox is ticked, but based on our model schema 'completed' expects a boolean value so we reformat the 'completed' field value
         if (req.body.completed === "on") { 
             // if it is checked
             req.body.completed = true
@@ -90,8 +115,8 @@ app.get("/books/edit/:id", async (req, res) => {
     try {
         // find the book to edit
         let foundBook = await Book.findByIdAndUpdate(req.params.id)
-        res.render("edit", {
-            book:foundBook
+        res.render("edit.ejs", {
+            book: foundBook
         })
     } catch (error) {
         res.send(error)
